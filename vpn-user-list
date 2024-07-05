@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# This file is managed by Ansible - do not edit
+# 2024062801
+
+# Author:  Linuxfabrik GmbH, Zurich, Switzerland
+# Contact: info (at) linuxfabrik (dot) ch
+#          https://www.linuxfabrik.ch/
+# License: The Unlicense, see LICENSE file.
+
+# List all users
+tail -n +2 /opt/lfvpn/easy-rsa/pki/index.txt
