@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# This file is managed by Ansible - do not edit
+# 2024062901
+
+# Author:  Linuxfabrik GmbH, Zurich, Switzerland
+# Contact: info (at) linuxfabrik (dot) ch
+#          https://www.linuxfabrik.ch/
+# License: The Unlicense, see LICENSE file.
+
+USERNAME=$1
+[ -z "${USERNAME}" ] && { echo -e "Call: $0 firstname.lastname firstname.lastname@example.com"; exit 1; }
+
+EMAIL=$2
+[ -z "${EMAIL}" ] && { echo -e "Call: $0 firstname.lastname firstname.lastname@example.com"; exit 1; }
+
+RED="\e[0;31m" # color red
+GREEN="\e[0;32m" # color green
+NO_COLOR="\e[0m"  # color no-color
+
+
+# Email the profile to the user
+PW=$(<"/opt/lfvpn/client/${USERNAME}/pass")
+CONTENT="""
+Use the attached VPN profile to connect using the OpenVPN client for Linux and Windows (https://openvpn.net/community-downloads/) or Tunnelblick for Mac.
+
+* VPN Username: ${USERNAME}
+* VPN Password: ${PW}
+
+Use the attached QR code in otp.png to register your two-factor authentication in any TOTP mobile application like FreeOTP or Google Authenticator.
+"""
+echo "${CONTENT}" | mailx -s "OpenVPN Connection Profile" -a "/opt/lfvpn/client/${USERNAME}/openvpn.conf" -a "/opt/lfvpn/client/${USERNAME}/otp.png" -r "no-reply <noreply@example.com>" "${EMAIL}" || { echo "${RED}Error mailing profile to ${USERNAME}${NO_COLOR}"; exit 1; }
+echo -e "${GREEN}Credentials sent to ${EMAIL}${NO_COLOR}"
