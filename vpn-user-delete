@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# This file is managed by Ansible - do not edit
+# 2024062801
+
+# Author:  Linuxfabrik GmbH, Zurich, Switzerland
+# Contact: info (at) linuxfabrik (dot) ch
+#          https://www.linuxfabrik.ch/
+# License: The Unlicense, see LICENSE file.
+
+USERNAME=$1
+[ -z "${USERNAME}" ] && { echo -e "Call: $0 firstname.lastname"; exit 1; }
+
+
+# Revoke Cert and create CRL
+cd /opt/lfvpn/easy-rsa/ || return
+/usr/share/easy-rsa/3/easyrsa --batch revoke "${USERNAME}"
+EASYRSA_CRL_DAYS=1000 /usr/share/easy-rsa/3/easyrsa --batch gen-crl
+\cp /opt/lfvpn/easy-rsa/pki/crl.pem /etc/openvpn/server/crl.pem
+chmod 0600 /etc/openvpn/server/crl.pem
+chown openvpn:openvpn /etc/openvpn/server/crl.pem
+
+
+# Delete all certs
+SERNO=$(grep "$USERNAME" /opt/lfvpn/easy-rsa/pki/index.txt | cut -f4)
+find /opt/lfvpn/easy-rsa -name "'$USERNAME*'" -delete 2> /dev/null
+find /opt/lfvpn/easy-rsa -name "'$SERNO*'" -delete 2> /dev/null
+find /etc/openvpn/USERNAME -type d -name "'$USERNAME*'" -exec rm -rf {} \; 2> /dev/null
+sed --in-place "/CN=$USERNAME/d" /opt/lfvpn/easy-rsa/pki/index.txt 2> /dev/null
+
+
+# Delete system user
+id "${USERNAME}" && userdel -rf "${USERNAME}"
+
+
+rm -rf "/opt/lfvpn/client/${USERNAME}"
