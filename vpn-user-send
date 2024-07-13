@@ -21,12 +21,18 @@ NO_COLOR="\e[0m"  # color no-color
 # Email the profile to the user
 PW=$(<"/opt/lfvpn/client/${USERNAME}/pass")
 CONTENT="""
-Use the attached VPN profile to connect using the OpenVPN client for Linux and Windows (https://openvpn.net/community-downloads/) or Tunnelblick for Mac.
+Use the attached VPN profile 'openvpn.conf' to connect using the OpenVPN client for your preferred platform:
+
+* Linux: Install from your package manager, save the profile, and connect using 'openvpn --config=openvpn.conf'.
+* Mac: Install Tunnelblick for Mac, save the profile, and connect.
+* Windows: Install from https://openvpn.net/community-downloads/, save the profile as 'openvpn.ovpn', import it into the OpenVPN GUI client, and connect.
+
+Your credentials:
 
 * VPN Username: ${USERNAME}
 * VPN Password: ${PW}
 
-Use the attached QR code in otp.png to register your two-factor authentication in any TOTP mobile application like FreeOTP or Google Authenticator.
+Use the attached QR code in 'otp.png' to register your two-factor authentication in any TOTP mobile application like FreeOTP or Google Authenticator.
 """
 echo "${CONTENT}" | mailx -s "OpenVPN Connection Profile" -a "/opt/lfvpn/client/${USERNAME}/openvpn.conf" -a "/opt/lfvpn/client/${USERNAME}/otp.png" -r "no-reply <noreply@example.com>" "${EMAIL}" || { echo "${RED}Error mailing profile to ${USERNAME}${NO_COLOR}"; exit 1; }
 echo -e "${GREEN}Credentials sent to ${EMAIL}${NO_COLOR}"
